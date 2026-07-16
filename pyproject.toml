@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "welfareweights"
-version = "0.0.1"
+version = "0.1.0"
 description = "Open implementation of the GBD disability-weight estimation pipeline (Salomon et al. 2012/2015): probit on paired comparisons, interval regression on population-health-equivalence responses, logit-space rescaling."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -18,6 +18,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://welfareweights.com"
+Documentation = "https://welfareweights.github.io/engine/"
+Repository = "https://github.com/welfareweights/engine"
 
 [tool.setuptools.packages.find]
 where = ["src"]
