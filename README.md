@@ -1,12 +1,12 @@
 # WelfareWeights Engine
 
-Open-source tooling to estimate **disability weights** from survey data — the valuations that turn health states into DALYs (disability-adjusted life years) for burden-of-disease work — and to extend that methodology to health and welfare states that are not yet well modeled.
+Open-source tooling to estimate disability weights from survey data. These are the valuations that turn health states into DALYs (disability-adjusted life years) for burden-of-disease work. Eventually we will extend that methodology to health and welfare states that are not yet well modeled.
 
 This is the academic core of the [WelfareWeights](https://welfareweights.com) project. The companion survey platform (welfareweights.com) is managed separately; this repository is the freely reusable engine and its documentation.
 
 ## Why
 
-DALYs compress an enormous range of human experience into a single number, and the disability weights underneath them are estimated from public surveys using a methodology that most researchers cannot easily reproduce or extend. The goal here is to make that methodology transparent, reproducible, and open — so weights can be replicated, scrutinized, and computed for new states — with uses spanning burden-of-disease accounting, policy analysis, and welfare measurement more broadly.
+DALYs compress an enormous range of human experience into a single number, and the disability weights underneath them are estimated from public surveys using a methodology that most researchers cannot easily reproduce or extend. The goal here is to democratize and open-source that methodology. I want transparent, reproducible, and open code, so weights can be replicated, scrutinized, and computed for new states. This will help people doing burden-of-disease accounting, policy analysis, and welfare measurement more broadly.
 
 ## Scope
 
@@ -16,7 +16,7 @@ DALYs compress an enormous range of human experience into a single number, and t
 
 ## Status
 
-Early and under active construction — the methodology and the language choice (R and/or Python) are being set up now. Expect the structure and interfaces to change. Watch or star the repo to follow along.
+Early and under active construction. We are testing Python code against synthetic data while requesting the original data. Expect the structure and interfaces to change. Watch or star the repo to follow along.
 
 ## License
 
@@ -31,7 +31,3 @@ Note that raw survey responses are governed by respondent consent and privacy ru
 
 If you use this work, please cite it via the "Cite this repository" button (see [CITATION.cff](CITATION.cff)). A versioned DOI will be added on first release.
 
-## Links
-
-- Project site: https://welfareweights.com
-- Companion platform (managed): `welfareweights/platform`
