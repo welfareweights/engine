@@ -6,6 +6,9 @@ type: software
 authors:
   - family-names: Bruns
     given-names: Richard
+    orcid: "https://orcid.org/0000-0002-2209-4242"
+    email: bruns@jhu.edu
+    affiliation: "Johns Hopkins University"
 repository-code: "https://github.com/welfareweights/engine"
 url: "https://welfareweights.com"
 license: Apache-2.0

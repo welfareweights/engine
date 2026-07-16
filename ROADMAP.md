@@ -9,13 +9,14 @@ What this engine can and cannot claim today, and what comes next, in order.
 - Validation without microdata: known-truth recovery tests, metamorphic invariance tests, a misspecification battery, link-robustness cross-checks, held-out fit diagnostics, and survey-design power curves. See `docs/VALIDATION.md` for the evidence in one place.
 - Anchor-linearity gate. The misspecification battery found the one violation that damages weight levels while evading R²: curvature in the paired-comparison utility link. The pipeline now fits a quadratic alongside the anchor line and warns when the bend is material and statistically significant (`tests/test_curvature_diagnostic.py`); mild bends remain below its power at typical anchor counts, so survey designs should still spread PHE anchor states across the severity range (also the cheapest precision margin per the power study).
 
+- Multi-survey pooling (`pooling.py`): per-survey estimation combined on the death-anchored scale with a cross-survey tau in the back-transform, the mechanism the published pipeline uses to pool surveys; validated by reduction, recovery, and disagreement tests (`tests/test_pooling.py`). Real multi-survey behavior becomes testable once more than one dataset exists.
+
 ## Next
 
 1. **Refit published weights from the original survey microdata.** The single most important step, and the one we cannot take alone: the GBD/GHE raw responses are not public. Data requests are in progress with the original study teams. Everything below is what we can do while we wait; the synthetic validation above is designed so that, when microdata arrives, the only untested step is the data itself.
-2. **Multi-survey machinery.** The published pipeline pools multiple surveys with a cross-survey variance term in the back-transform; the engine currently runs single-survey (tau = 0). Becomes testable once more than one dataset exists.
-3. **LLM-respondent surveys.** The instrument builder and parser already serve synthetic LLM respondents. Two separate uses, kept separate: stress-testing the estimation pipeline on realistic non-DGP responses, and studying how language models themselves value health states. Early pilots ran; a clean, larger re-run is queued behind the repo-facing work.
-4. **New-state extension.** The point of the project: estimating weights for health and welfare states the current instruments miss. Requires the validated pipeline plus new survey data (see the companion platform at [welfareweights.com](https://welfareweights.com)).
-5. **R companion, on request.** The estimation logic is small enough to port in a day; we will do it when a user actually asks for it rather than speculatively (open an issue if that user is you).
+2. **LLM-respondent surveys.** The instrument builder and parser already serve synthetic LLM respondents. Two separate uses, kept separate: stress-testing the estimation pipeline on realistic non-DGP responses, and studying how language models themselves value health states. Early pilots ran; a clean, larger re-run is queued behind the repo-facing work.
+3. **New-state extension.** The point of the project: estimating weights for health and welfare states the current instruments miss. Requires the validated pipeline plus new survey data (see the companion platform at [welfareweights.com](https://welfareweights.com)).
+4. **R companion, on request.** The estimation logic is small enough to port in a day; we will do it when a user actually asks for it rather than speculatively (open an issue if that user is you).
 
 ## Contributing
 
