@@ -18,7 +18,7 @@ DALYs compress an enormous range of human experience into a single number, and t
 
 ## Understand and audit the method
 
-[docs/METHODS.md](docs/METHODS.md) explains the whole estimator (what the survey questions ask, what each stage assumes, why the tricks work, what must be true for the weights to mean anything, and how to attack it), written for people who did econometrics years ago or who know math and code but never took it; [docs/methods.pdf](docs/methods.pdf) is the same document typeset, with full citations and the validation evidence as an appendix. [examples/quickstart.py](examples/quickstart.py) runs the full pipeline with uncertainty intervals on synthetic data with known true weights, in about fifteen seconds.
+[docs/METHODS.md](docs/METHODS.md) explains the whole estimator (what the survey questions ask, what each stage assumes, why the tricks work, what must be true for the weights to mean anything, and how to attack it), written for people who did econometrics years ago or who know math and code but never took it; [methods.pdf](https://cdn.jsdelivr.net/gh/welfareweights/engine@main/docs/methods.pdf) is the same document typeset, with full citations and the validation evidence as an appendix (that link opens the PDF in your browser's own viewer, where the hyperlinks work; GitHub's embedded PDF pane does not support links, so use this one rather than browsing to [docs/methods.pdf](docs/methods.pdf)). [examples/quickstart.py](examples/quickstart.py) runs the full pipeline with uncertainty intervals on synthetic data with known true weights, in about fifteen seconds.
 
 ## Validation
 
