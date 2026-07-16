@@ -15,7 +15,7 @@ What this engine can and cannot claim today, and what comes next, in order.
 2. **Multi-survey machinery.** The published pipeline pools multiple surveys with a cross-survey variance term in the back-transform; the engine currently runs single-survey (tau = 0). Becomes testable once more than one dataset exists.
 3. **LLM-respondent surveys.** The instrument builder and parser already serve synthetic LLM respondents. Two separate uses, kept separate: stress-testing the estimation pipeline on realistic non-DGP responses, and studying how language models themselves value health states. Early pilots ran; a clean, larger re-run is queued behind the repo-facing work.
 4. **New-state extension.** The point of the project: estimating weights for health and welfare states the current instruments miss. Requires the validated pipeline plus new survey data (see the companion platform at [welfareweights.com](https://welfareweights.com)).
-5. **R companion.** A replication guide and port so the pipeline is usable from both ecosystems.
+5. **R companion, on request.** The estimation logic is small enough to port in a day; we will do it when a user actually asks for it rather than speculatively (open an issue if that user is you).
 
 ## Contributing
 

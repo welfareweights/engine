@@ -29,9 +29,7 @@
 \begin{document}
 \maketitle
 
-\begin{abstract}
-\noindent This is the auditing document for the WelfareWeights engine, an open implementation of the estimation pipeline behind the Global Burden of Disease disability weights \cite{salomon2012}. It explains what the estimator does and why, at the level of someone who took econometrics in grad school years ago, or someone fluent in math and code who never took it. Appendix~\ref{app:validation} carries the referee-facing validation evidence; every number in it is reproducible from the repository's committed tests and studies with recorded seeds. Code objects throughout are live links into the repository.
-\end{abstract}
+This is the auditing document for the WelfareWeights engine, an open implementation of the estimation pipeline behind the Global Burden of Disease disability weights (\href{https://doi.org/10.1016/S0140-6736(12)61680-8}{Salomon et al.\ 2012}). It explains what the estimator does and why, at the level of someone who took econometrics in grad school years ago, or someone fluent in math and code who never took it. Appendix~\ref{app:validation} carries the referee-facing validation evidence; every number in it is reproducible from the repository's committed tests and studies with recorded seeds. Code objects throughout are live links into the repository.
 
 \paragraph{Notation.} $\Phi$ is the standard normal CDF; $\logit(p)=\log\frac{p}{1-p}$ maps probabilities $(0,1)$ onto the real line; $\expit$ is its inverse. ``MLE'' is maximum likelihood estimation: pick the parameter values under which the observed data was most probable.
 
@@ -41,11 +39,11 @@ A disability weight is a number between 0 and 1 that says how bad a year lived w
 
 Concretely: with a weight of 0.30, ten years lived with the condition contribute $0.30 \times 10 = 3.0$ DALYs (years of healthy life lost to disability); a death at 40 with life expectancy 80 contributes 40 DALYs. A program that cures 1{,}000 people of a 0.30-weight condition for 10 years averts 3{,}000 DALYs; at a cost of \$6 million that is \$2{,}000 per DALY averted, and that number is what gets compared across programs. The weights carry real decisions: cut the 0.30 to 0.20 (a plausible disagreement between elicitation methods) and the program's cost-effectiveness worsens by a third, easily enough to move it across a funding threshold. This sensitivity is why it matters that the weights be reproducible and auditable, and why this engine exists.
 
-The formal rulebooks for this arithmetic are the reference-case guidelines for benefit-cost analysis in global health and development \cite{robinson2019} (which cite Salomon et al.\ 2012 by name as the source of the weights they monetize) and, for US rulemaking, the HHS Guidelines for Regulatory Impact Analysis \cite{hhs2016}. Both take health-state weights as inputs to the benefit calculation; producing those inputs transparently is exactly the step this engine makes auditable.
+The formal rulebooks for this arithmetic are the reference-case guidelines for benefit-cost analysis in global health and development (\href{https://media.repository.chds.hsph.harvard.edu/static/filer_public/16/3c/163c0d02-1837-4e9b-b88b-d646bbea857c/2019_robinson_ref_case_guidelin_bca_proj_r_126.pdf}{Robinson et al.\ 2019}, which cites Salomon et al.\ 2012 by name as the source of the weights it monetizes) and, for US rulemaking, the HHS \href{https://aspe.hhs.gov/reports/guidelines-regulatory-impact-analysis}{Guidelines for Regulatory Impact Analysis}. Both take health-state weights as inputs to the benefit calculation; producing those inputs transparently is exactly the step this engine makes auditable.
 
 And these are not academic abstractions. \href{https://www.givewell.org/how-we-work/our-criteria/cost-effectiveness/moral-weights}{GiveWell's cost-effectiveness models} multiply GBD disability weights directly into the value of every recommended charity; where GiveWell distrusts a published weight it overrides it and says so (schistosomiasis, where it uses 0.05 against the GBD's 0.005--0.006), which is precisely the kind of scrutiny transparent weights invite. \href{https://coefficientgiving.org/research/technical-updates-to-our-global-health-and-wellbeing-cause-prioritization-framework/}{Open Philanthropy's global health funding bar} is roughly \$50 per DALY averted, with the weights in the denominator of every grant screened against it. \href{https://www.dcp-3.org/news/pakistans-investment-universal-health-coverage}{Pakistan's national essential health services package} was assembled by ranking 117 interventions on cost-per-DALY figures built on these weights. \href{https://www.gavi.org/vaccineswork/gavis-impact-2023-seven-key-statistics}{Gavi's board} prioritizes new vaccine investments partly on procurement cost per DALY averted.
 
-The weights come from surveys, and the surveys deliberately do NOT ask ``rate this condition from 0 to 1'' (people are bad at that). They ask two kinds of easier questions, and the estimation problem is to reassemble the 0-to-1 scale from the answers. The engine implements the reassembly used for the GBD weights \cite{salomon2012,salomon2015}, in three stages.
+The weights come from surveys, and the surveys deliberately do NOT ask ``rate this condition from 0 to 1'' (people are bad at that). They ask two kinds of easier questions, and the estimation problem is to reassemble the 0-to-1 scale from the answers. The engine implements the reassembly used for the GBD weights (\href{https://doi.org/10.1016/S0140-6736(12)61680-8}{Salomon et al.\ 2012}, \href{https://doi.org/10.1016/S2214-109X(15)00069-8}{2015}), in three stages.
 
 \section{The two question types}
 
@@ -81,7 +79,7 @@ One convention to swallow before going further: reading the choice as ``$1000$ v
 \begin{equation}
 P(\text{answer ``}i\text{ healthier''}) \;=\; \Phi\!\left(\frac{\theta_i - \theta_j}{\sqrt{2\sigma^2}}\right).
 \end{equation}
-This is Thurstone's comparative-judgment model \cite{thurstone1927}. Intuition: states far apart in $\theta$ produce near-unanimous answers; states close together produce closer to 50/50. The observed disagreement \emph{rates} are exactly what identifies the spacings.
+This is Thurstone's comparative-judgment model (\href{https://doi.org/10.1037/h0070288}{Thurstone 1927}). Intuition: states far apart in $\theta$ produce near-unanimous answers; states close together produce closer to 50/50. The observed disagreement \emph{rates} are exactly what identifies the spacings.
 
 \textbf{Two things the data cannot tell you} (this is what econometricians mean by an identification problem): adding a constant to every $\theta$ changes nothing, because only differences enter; multiplying all $\theta$ and $\sigma$ by the same factor changes nothing, because only the ratio enters. So we normalize by convention: set $2\sigma^2 = 1$ and fix one arbitrary reference state's $\theta$ to 0. Both choices are undone later; the test suite proves numerically that the final weights do not depend on the reference state (\fn{test\_reference\_state\_invariance}), and stage C exists precisely to replace the arbitrary location and scale with a meaningful one.
 
@@ -200,7 +198,7 @@ Salomon, J.A., et al.\ (2015).
 Robinson, L.A., Hammitt, J.K., et al.\ (2019).
 \emph{Reference Case Guidelines for Benefit-Cost Analysis in Global Health and Development.}
 Harvard T.H.\ Chan School of Public Health.
-\href{https://content.sph.harvard.edu/wwwhsph/sites/2447/2019/05/BCA-Guidelines-May-2019.pdf}{content.sph.harvard.edu/.../BCA-Guidelines-May-2019.pdf}.
+\href{https://media.repository.chds.hsph.harvard.edu/static/filer_public/16/3c/163c0d02-1837-4e9b-b88b-d646bbea857c/2019_robinson_ref_case_guidelin_bca_proj_r_126.pdf}{media.repository.chds.hsph.harvard.edu (stable repository copy)}.
 
 \bibitem[HHS(2016)]{hhs2016}
 U.S.\ Department of Health and Human Services, Office of the Assistant Secretary for Planning and Evaluation (2016).
