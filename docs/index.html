@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WelfareWeights Engine — documentation</title>
+<base target="_blank">
+<style>
+  body { font-family: Georgia, serif; max-width: 44rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.55; color: #1a1a1a; }
+  h1 { font-size: 1.6rem; } h2 { font-size: 1.15rem; margin-top: 2rem; }
+  a { color: #1a4d8f; } li { margin: 0.45rem 0; }
+  .note { color: #555; font-size: 0.92rem; }
+  @media (prefers-color-scheme: dark) { body { background:#111; color:#ddd; } a { color:#7fb0ff; } .note { color:#aaa; } }
+</style>
+</head>
+<body>
+<h1>WelfareWeights Engine</h1>
+<p>An open implementation of the estimation pipeline behind the Global Burden of Disease disability weights: the numbers between 0 (full health) and 1 (as bad as dead) underneath every DALY figure. Every link on this page opens in a new tab.</p>
+
+<h2>Read</h2>
+<ul>
+  <li><a href="methods.pdf"><strong>How disability weights are estimated (PDF)</strong></a> — the full guide: the survey questions, the three-stage estimator, what must be true for the weights to mean anything, and how to audit it; validation evidence and reproduction guide as appendices. Written for people who did econometrics years ago, or who know math and code but never took it.</li>
+  <li><a href="https://github.com/welfareweights/engine/blob/main/docs/METHODS.md">The same guide as markdown</a> (browsable on GitHub).</li>
+  <li><a href="https://github.com/welfareweights/engine/blob/main/docs/VALIDATION.md">Validation evidence</a> — nine lines of defense, every number reproducible with recorded seeds.</li>
+  <li><a href="https://github.com/welfareweights/engine/blob/main/ROADMAP.md">Roadmap</a> — what is done, what is next, and what we need (the original survey microdata) to finish the job.</li>
+</ul>
+
+<h2>Run</h2>
+<ul>
+  <li><a href="https://github.com/welfareweights/engine">The repository</a> — Apache-2.0 code, CC-BY-4.0 documentation.</li>
+  <li><a href="https://github.com/welfareweights/engine/blob/main/examples/quickstart.py">quickstart.py</a> — the full pipeline with uncertainty intervals on synthetic data with known true weights, in about fifteen seconds.</li>
+  <li><a href="https://github.com/welfareweights/engine/tree/main/studies">The studies</a> — misspecification battery, power curves, bootstrap coverage, and recovery at the published GBD 2010 design scale.</li>
+</ul>
+
+<h2>Context</h2>
+<ul>
+  <li><a href="https://content.sph.harvard.edu/wwwhsph/sites/2447/2019/05/BCA-Guidelines-May-2019.pdf">Reference Case Guidelines for Benefit-Cost Analysis in Global Health and Development</a> (Robinson et al. 2019) and the <a href="https://aspe.hhs.gov/reports/guidelines-regulatory-impact-analysis">HHS Guidelines for Regulatory Impact Analysis</a> — the formal frameworks in which these weights get used.</li>
+  <li><a href="https://doi.org/10.1016/S0140-6736(12)61680-8">Salomon et al. 2012</a> and <a href="https://doi.org/10.1016/S2214-109X(15)00069-8">Salomon et al. 2015</a> — the methodology this engine replicates.</li>
+</ul>
+
+<p class="note">Part of the <a href="https://welfareweights.com">WelfareWeights</a> project.</p>
+</body>
+</html>

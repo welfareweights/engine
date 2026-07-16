@@ -41,6 +41,8 @@ A disability weight is a number between 0 and 1 that says how bad a year lived w
 
 Concretely: with a weight of 0.30, ten years lived with the condition contribute $0.30 \times 10 = 3.0$ DALYs (years of healthy life lost to disability); a death at 40 with life expectancy 80 contributes 40 DALYs. A program that cures 1{,}000 people of a 0.30-weight condition for 10 years averts 3{,}000 DALYs; at a cost of \$6 million that is \$2{,}000 per DALY averted, and that number is what gets compared across programs. The weights carry real decisions: cut the 0.30 to 0.20 (a plausible disagreement between elicitation methods) and the program's cost-effectiveness worsens by a third, easily enough to move it across a funding threshold. This sensitivity is why it matters that the weights be reproducible and auditable, and why this engine exists.
 
+The formal rulebooks for this arithmetic are the reference-case guidelines for benefit-cost analysis in global health and development \cite{robinson2019} and, for US rulemaking, the HHS Guidelines for Regulatory Impact Analysis \cite{hhs2016}. Both take health-state weights as inputs to the benefit calculation; producing those inputs transparently is exactly the step this engine makes auditable.
+
 The weights come from surveys, and the surveys deliberately do NOT ask ``rate this condition from 0 to 1'' (people are bad at that). They ask two kinds of easier questions, and the estimation problem is to reassemble the 0-to-1 scale from the answers. The engine implements the reassembly used for the GBD weights \cite{salomon2012,salomon2015}, in three stages.
 
 \section{The two question types}
@@ -178,7 +180,7 @@ From a checkout with the virtual environment installed (\texttt{pip install -e .
 \item \texttt{python studies/coverage.py}, \texttt{misspecification.py}, \texttt{power\_curves.py}, \texttt{gbd\_scale.py}: the four studies (minutes each; seeds recorded in each script and report).
 \end{itemize}
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 \bibitem[Salomon et al.(2012)]{salomon2012}
 Salomon, J.A., et al.\ (2012).
 ``Common values in assessing health outcomes from disease and injury: disability weights measurement study for the Global Burden of Disease Study 2010.''
@@ -191,6 +193,17 @@ Salomon, J.A., et al.\ (2015).
 ``Disability weights for the Global Burden of Disease 2013 study.''
 \emph{The Lancet Global Health} 3(11):e712--e723.
 \href{https://doi.org/10.1016/S2214-109X(15)00069-8}{doi:10.1016/S2214-109X(15)00069-8}.
+
+\bibitem[Robinson et al.(2019)]{robinson2019}
+Robinson, L.A., Hammitt, J.K., et al.\ (2019).
+\emph{Reference Case Guidelines for Benefit-Cost Analysis in Global Health and Development.}
+Harvard T.H.\ Chan School of Public Health.
+\href{https://content.sph.harvard.edu/wwwhsph/sites/2447/2019/05/BCA-Guidelines-May-2019.pdf}{content.sph.harvard.edu/.../BCA-Guidelines-May-2019.pdf}.
+
+\bibitem[HHS(2016)]{hhs2016}
+U.S.\ Department of Health and Human Services, Office of the Assistant Secretary for Planning and Evaluation (2016).
+\emph{Guidelines for Regulatory Impact Analysis.}
+\href{https://aspe.hhs.gov/reports/guidelines-regulatory-impact-analysis}{aspe.hhs.gov/reports/guidelines-regulatory-impact-analysis}.
 
 \bibitem[Thurstone(1927)]{thurstone1927}
 Thurstone, L.L.\ (1927).

@@ -10,6 +10,8 @@ A disability weight is a number between 0 and 1 that says how bad a year lived w
 
 Concretely: with a weight of 0.30, ten years lived with the condition contribute 0.30 x 10 = 3.0 DALYs (years of healthy life lost to disability); a death at 40 with life expectancy 80 contributes 40 DALYs. A program that cures 1,000 people of a 0.30-weight condition for 10 years averts 3,000 DALYs; if it costs $6 million, that is $2,000 per DALY averted, and that number is what gets compared across programs. The weights carry real decisions: cut the 0.30 to 0.20 (a plausible disagreement between elicitation methods) and the program's cost-effectiveness worsens by a third, which is easily enough to move it across a funding threshold. This sensitivity is why it matters that the weights be reproducible and auditable, and why this engine exists.
 
+The formal rulebooks for this arithmetic are the reference-case guidelines for benefit-cost analysis in global health and development ([Robinson et al. 2019](https://content.sph.harvard.edu/wwwhsph/sites/2447/2019/05/BCA-Guidelines-May-2019.pdf)) and, for US rulemaking, the HHS [Guidelines for Regulatory Impact Analysis](https://aspe.hhs.gov/reports/guidelines-regulatory-impact-analysis). Both take health-state weights as inputs to the benefit calculation; producing those inputs transparently is exactly the step this engine makes auditable.
+
 The weights come from surveys, and the surveys deliberately do NOT ask "rate this condition from 0 to 1" (people are bad at that). They ask two kinds of easier questions, and the estimation problem is to reassemble the 0-to-1 scale from the answers. This engine implements the reassembly used for the GBD weights (Salomon et al. 2012, 2015), in three stages.
 
 ## 2. The two question types
