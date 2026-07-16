@@ -16,6 +16,10 @@ them onto the 0–1 scale.
 | B | Interval-censored normal regression on PHE responses → death-anchored logit-scale weights | `anchor.py` | `fit_phe` |
 | C | Linear map A→B scale, then integrate through inverse-logit → weights on [0, 1] | `rescale.py` | `fit_anchor_map`, `expected_expit` |
 | — | Chain A→B→C | `pipeline.py` | `estimate_dws` |
+| — | Respondent-cluster bootstrap → uncertainty intervals | `inference.py` | `bootstrap_dws` |
+| — | Held-out fit and calibration diagnostics | `validate.py` | `holdout_fit` |
+
+Estimation refuses to run silently on unidentified inputs: both probit stages raise on separation and non-convergence, `fit_phe` raises on one-sided anchor states (`estimate_dws` instead drops them from the anchor stage with a warning), the anchor map raises on fewer than three shared states or a non-negative slope, `estimate_dws` warns when anchor R² falls below `min_anchor_r2`, and the per-row `deaths` column in the PHE table is authoritative — a contradictory argument raises. `tests/test_failure_modes.py` pins every one of these paths.
 
 Two design choices worth knowing:
 
@@ -32,27 +36,23 @@ Two design choices worth knowing:
 
 ## Why it's trustworthy without real microdata
 
-No respondent-level survey data is public yet (`research/notes/
-data-availability.md`), so the estimator cannot yet be validated by refitting
-the published GBD weights from their own raw responses. Two things stand in
-for that:
+The full evidence chain — known-truth recovery, metamorphic invariances, loud
+failure modes, link-robustness, held-out fit, bootstrap coverage, the
+misspecification battery, and the GBD-design-scale run — lives in
+`VALIDATION.md`, with the reproducible studies in `../studies/`. The one
+documented blind spot (curvature in the comparison-utility link damages
+levels while evading the R² diagnostic) is tracked as `../ROADMAP.md` item 2.
 
-1. **Monte Carlo recovery** (`tests/test_recovery.py`): `simulate.py` generates
-   PC/PHE data from the exact DGP the estimator assumes, with known true
-   weights; the tests require the pipeline to recover them (rank correlation
-   > 0.995, max error < 0.04 at the tested N). This validates the *code against
-   the model* — the referee's "does it recover truth", not just "does it run".
-2. **Output validation** (`../data/published/`): the pipeline's estimates are
-   compared to the published WHO GHE2021 / GBD weight tables. This validates
-   *plausibility of level*, not identification.
+A second, independent check compares pipeline output against the published
+WHO GHE2021 / GBD weight tables (`../data/published/`). This validates
+*plausibility of level*, not identification. The published tables and lay
+descriptions live in the sibling `../data/` directory, not in the engine,
+because they carry clinical health-state text that is kept out of the
+engine's review surface (see `../../data/README.md`). The engine's own tests
+use synthetic state labels and read none of it.
 
-The published tables and lay descriptions live in the sibling `../data/`
-directory, not in the engine, because they carry clinical health-state text
-that is kept out of the engine's review surface (see `../../data/README.md`).
-The engine's own tests use synthetic state labels and read none of it.
-
-The two are complementary and neither replaces refitting from real microdata,
-which stays blocked pending a data grant (see top-level `HUMAN-TODO.md`).
+Neither replaces refitting from real microdata, which stays blocked pending
+a data grant (see top-level `HUMAN-TODO.md`).
 
 ## Synthetic survey (LLM respondents)
 
