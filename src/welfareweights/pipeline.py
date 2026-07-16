@@ -18,6 +18,7 @@ def estimate_dws(
     ref_state: str | None = None,
     tau: float = 0.0,
     min_anchor_r2: float = 0.9,
+    max_curvature_impact: float = 0.025,
     weight_by_precision: bool = False,
 ) -> tuple[pd.DataFrame, dict]:
     """Run the full stage A -> B -> C pipeline.
@@ -30,6 +31,13 @@ def estimate_dws(
             0 with a single survey — see rescale module docstring.
     min_anchor_r2: warn when the anchor line fits the shared states worse than
             this — weight LEVELS are suspect below it even where ranking holds.
+    max_curvature_impact: warn when the anchor scatter bends by more than this
+            (in weight units, see AnchorMap.curvature_impact) AND the bend is
+            statistically distinguishable from noise (quadratic-term p < 0.05).
+            Curvature is the one violation that damages levels while evading
+            R^2; this gate detects severe bends, while mild ones sit below the
+            noise floor at typical anchor counts (calibration in
+            tests/test_curvature_diagnostic.py).
     weight_by_precision: precision-weight the anchor OLS (see fit_anchor_map).
 
     One-sided PHE states (every response favoring the same program) are dropped
@@ -62,6 +70,15 @@ def estimate_dws(
             f"anchor-map R^2 = {amap.r_squared:.3f} < {min_anchor_r2}: the affine map "
             "from the comparison scale to the death-anchored scale fits poorly, so "
             "weight levels are suspect"
+        )
+    # NaN compares False on both conditions: no warning below 5 shared states.
+    if amap.curvature_impact > max_curvature_impact and amap.curvature_pvalue < 0.05:
+        warnings.warn(
+            f"anchor scatter shows curvature (impact ~{amap.curvature_impact:.3f} in weight "
+            f"units on the anchor range, p={amap.curvature_pvalue:.3f}): the straight-line "
+            "map stage C assumes is bent, so weight LEVELS are suspect; the damage is worse "
+            "outside the anchor range, where the bend is extrapolated. Rankings are "
+            "unaffected. Widen the PHE anchor range and inspect the anchor scatter."
         )
 
     logit_dw = amap.to_logit_dw(pc_fit.beta)

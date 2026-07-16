@@ -18,7 +18,7 @@ DALYs compress an enormous range of human experience into a single number, and t
 
 ## Understand and audit the method
 
-[docs/METHODS.md](docs/METHODS.md) explains the whole estimator — what the survey questions ask, what each stage assumes, why the tricks work, what must be true for the weights to mean anything, and how to attack it — written for people who did econometrics years ago or who know math and code but never took it. [examples/quickstart.py](examples/quickstart.py) runs the full pipeline with uncertainty intervals on synthetic data with known true weights, in about fifteen seconds.
+[docs/METHODS.md](docs/METHODS.md) explains the whole estimator (what the survey questions ask, what each stage assumes, why the tricks work, what must be true for the weights to mean anything, and how to attack it), written for people who did econometrics years ago or who know math and code but never took it; [docs/methods.pdf](docs/methods.pdf) is the same document typeset, with full citations and the validation evidence as an appendix. [examples/quickstart.py](examples/quickstart.py) runs the full pipeline with uncertainty intervals on synthetic data with known true weights, in about fifteen seconds.
 
 ## Validation
 
@@ -26,14 +26,14 @@ The original survey microdata is not public, so the estimator is validated the h
 
 ## Status
 
-Early and under active construction. The estimation pipeline is implemented and validated against synthetic data (see above) while we request the original survey data — the roadmap is in [ROADMAP.md](ROADMAP.md). Expect interfaces to change. Watch or star the repo to follow along.
+Early and under active construction. The estimation pipeline is implemented and validated against synthetic data (see above) while we request the original survey data; the roadmap is in [ROADMAP.md](ROADMAP.md). Expect interfaces to change. Watch or star the repo to follow along.
 
 ## License
 
 Two licenses, by artifact type:
 
-- **Code** — [Apache License 2.0](LICENSE). Use it freely, including commercially; it carries an explicit patent grant.
-- **Data, estimated weights, and documentation** — [Creative Commons Attribution 4.0](LICENSE-DATA) (CC-BY-4.0). Reuse freely with attribution.
+- **Code**: [Apache License 2.0](LICENSE). Use it freely, including commercially; it carries an explicit patent grant.
+- **Data, estimated weights, and documentation**: [Creative Commons Attribution 4.0](LICENSE-DATA) (CC-BY-4.0). Reuse freely with attribution.
 
 Note that raw survey responses are governed by respondent consent and privacy rules, not by these licenses, and are not published here.
 

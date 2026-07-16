@@ -38,6 +38,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from scipy.special import expit
+from scipy.stats import t as t_dist
 
 from welfareweights.anchor import PHEFit
 from welfareweights.probit import PCFit
@@ -51,6 +52,18 @@ class AnchorMap:
     intercept: float
     n_shared: int
     r_squared: float
+    # Curvature diagnostic: curvature in the A<->B link damages weight levels
+    # while leaving both rankings and R^2 nearly intact (measured in
+    # studies/RESULTS-misspecification.md), so R^2 alone cannot certify
+    # levels. curvature_impact is the max disagreement, in weight units over
+    # the anchor range, between the fitted line and a quadratic fit to the
+    # same points — how much the bend matters. curvature_pvalue is the t-test
+    # on the quadratic coefficient — whether the bend is distinguishable from
+    # sampling noise, which keeps the impact metric's noise floor (it widens
+    # at small samples) from producing false alarms. Both NaN when fewer than
+    # 5 shared states (a quadratic through 3 points is exact interpolation).
+    curvature_impact: float
+    curvature_pvalue: float
 
     def to_logit_dw(self, beta: pd.Series) -> pd.Series:
         return (beta - self.intercept) / self.slope
@@ -87,8 +100,29 @@ def fit_anchor_map(
         )
     resid = y - (slope * x + intercept)
     r2 = 1.0 - resid.var() / y.var()
+
+    if len(shared) >= 5:
+        lin = slope * x + intercept
+        Xq = np.column_stack([np.ones_like(x), x, x * x])
+        coef, *_ = np.linalg.lstsq(Xq, y, rcond=None)
+        quad = Xq @ coef
+        dx = (quad - lin) / abs(slope)  # the bend, converted to logit-dw units
+        curvature_impact = float(np.max(np.abs(expit(x + dx) - expit(x))))
+        dof = len(shared) - 3
+        qresid = y - quad
+        se_q = np.sqrt(qresid @ qresid / dof * np.linalg.inv(Xq.T @ Xq)[2, 2])
+        curvature_pvalue = float(2.0 * t_dist.sf(abs(coef[2] / se_q), dof))
+    else:
+        curvature_impact = float("nan")
+        curvature_pvalue = float("nan")
+
     return AnchorMap(
-        slope=float(slope), intercept=float(intercept), n_shared=len(shared), r_squared=float(r2)
+        slope=float(slope),
+        intercept=float(intercept),
+        n_shared=len(shared),
+        r_squared=float(r2),
+        curvature_impact=curvature_impact,
+        curvature_pvalue=curvature_pvalue,
     )
 
 
