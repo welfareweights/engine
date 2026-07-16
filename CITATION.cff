@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "WelfareWeights Engine"
+abstract: "Open-source tooling to estimate disability weights from survey data (DALY / burden-of-disease methodology) and extend it to new health and welfare states."
+type: software
+authors:
+  - family-names: Bruns
+    given-names: Richard
+repository-code: "https://github.com/welfareweights/engine"
+url: "https://welfareweights.com"
+license: Apache-2.0
+keywords:
+  - disability-weights
+  - DALY
+  - burden-of-disease
+  - health-valuation
+  - welfare-measurement

@@ -1,0 +1,36 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# --- R ---
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+renv/library/
+renv/staging/
+renv/local/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+
+# --- Data ---
+# Never commit raw survey responses or anything with respondent PII.
+# Keep raw/private data out of the tree; commit only derived, shareable data.
+data/raw/
+data/private/
+*.local.*
