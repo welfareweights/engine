@@ -1,6 +1,8 @@
 # WelfareWeights Engine
 
-[![tests](https://github.com/welfareweights/engine/actions/workflows/ci.yml/badge.svg)](https://github.com/welfareweights/engine/actions/workflows/ci.yml)
+[![tests](https://github.com/welfareweights/engine/actions/workflows/ci.yml/badge.svg)](https://github.com/welfareweights/engine/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21401783.svg)](https://doi.org/10.5281/zenodo.21401783) [![PyPI](https://img.shields.io/pypi/v/welfareweights)](https://pypi.org/project/welfareweights/)
+
+Install: `pip install welfareweights`
 
 Open-source tooling to estimate disability weights from survey data. These are the valuations that turn health states into DALYs (disability-adjusted life years) for burden-of-disease work. Eventually we will extend that methodology to health and welfare states that are not yet well modeled.
 
