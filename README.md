@@ -16,6 +16,10 @@ DALYs compress an enormous range of human experience into a single number, and t
 2. **Open-source** it as a clean, well-documented library with user-friendly guides, so anyone can run survey data through it.
 3. **Extend** it to estimate weights for states the current instruments miss.
 
+## Understand and audit the method
+
+[docs/METHODS.md](docs/METHODS.md) explains the whole estimator — what the survey questions ask, what each stage assumes, why the tricks work, what must be true for the weights to mean anything, and how to attack it — written for people who did econometrics years ago or who know math and code but never took it. [examples/quickstart.py](examples/quickstart.py) runs the full pipeline with uncertainty intervals on synthetic data with known true weights, in about fifteen seconds.
+
 ## Validation
 
 The original survey microdata is not public, so the estimator is validated the hard way instead: known-truth recovery from the assumed data-generating process, metamorphic invariance tests, loud-failure tests for every identification hazard we found in review, a link-robustness cross-check, held-out fit diagnostics, Monte Carlo coverage tests of the bootstrap intervals, a misspecification battery, and a full-scale run at the published GBD 2010 design size (220 states, 14,000 respondents: rank correlation 0.9997, mean error 0.005). The evidence, including the one documented blind spot, is collected in [docs/VALIDATION.md](docs/VALIDATION.md); the studies behind it are reproducible from [studies/](studies/) with recorded seeds.
