@@ -2,11 +2,22 @@
 
 [![tests](https://github.com/welfareweights/engine/actions/workflows/ci.yml/badge.svg)](https://github.com/welfareweights/engine/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21401783.svg)](https://doi.org/10.5281/zenodo.21401783) [![PyPI](https://img.shields.io/pypi/v/welfareweights)](https://pypi.org/project/welfareweights/)
 
-Install: `pip install welfareweights`
+Install: `pip install welfareweights` (Python 3.11+)
 
 Open-source tooling to estimate disability weights from survey data. These are the valuations that turn health states into DALYs (disability-adjusted life years) for burden-of-disease work. Eventually we will extend that methodology to health and welfare states that are not yet well modeled.
 
 This is the academic core of the [WelfareWeights](https://welfareweights.com) project. The companion survey platform (welfareweights.com) is managed separately; this repository is the freely reusable engine and its documentation.
+
+## Use
+
+```python
+from welfareweights.inference import bootstrap_dws
+
+res = bootstrap_dws(pc_df, phe_df, n_boot=200, rng=0)
+print(res.weights)  # one row per health state: dw, lo, hi
+```
+
+`pc_df` holds paired-comparison responses (`respondent_id, state_1, state_2, y`) and `phe_df` holds population-health-equivalence responses (`respondent_id, state, n_cases, y`); the docstrings in [pipeline.py](src/welfareweights/pipeline.py) define the columns precisely. `welfareweights.estimate_dws` gives point estimates and diagnostics without the bootstrap, and `welfareweights.simulate` generates synthetic survey data from the assumed data-generating process if you have none yet — [examples/quickstart.py](examples/quickstart.py) shows the whole loop, truth to recovery, in about fifteen seconds.
 
 ## Why
 
@@ -41,5 +52,5 @@ Note that raw survey responses are governed by respondent consent and privacy ru
 
 ## Citation
 
-If you use this work, please cite it via the "Cite this repository" button (see [CITATION.cff](CITATION.cff)). A versioned DOI will be added on first release.
+If you use this work, please cite it via the "Cite this repository" button (see [CITATION.cff](CITATION.cff)). The concept DOI [10.5281/zenodo.21401783](https://doi.org/10.5281/zenodo.21401783) always resolves to the latest release.
 

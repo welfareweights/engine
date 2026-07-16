@@ -21,4 +21,4 @@ package's core correctness test. ``pipeline`` chains A-C end to end.
 from welfareweights.pipeline import estimate_dws
 
 __all__ = ["estimate_dws"]
-__version__ = "0.0.1"
+__version__ = "0.1.0"
