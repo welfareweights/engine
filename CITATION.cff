@@ -9,9 +9,9 @@ authors:
     orcid: "https://orcid.org/0000-0002-2209-4242"
     email: bruns@jhu.edu
     affiliation: "Johns Hopkins University"
-doi: 10.5281/zenodo.21401784
-version: 0.1.0
-date-released: 2026-07-16
+doi: 10.5281/zenodo.21401783
+version: 0.1.1
+date-released: 2026-07-17
 repository-code: "https://github.com/welfareweights/engine"
 url: "https://welfareweights.com"
 license: Apache-2.0

@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 (2026-07-17)
+
+Audit-response release: every blocks-nightly and fix-before-scale finding from the 2026-07-16 referee-grade audit, fixed with regression tests that record the pre-fix behavior verbatim.
 
 - Fixed: `bootstrap_dws` published standard errors roughly 30% too small — and correspondingly too-narrow intervals — whenever the input tables carried duplicate index labels, e.g. batches combined with `pd.concat` without `ignore_index=True`; point estimates were unchanged and no warning fired, so the corruption was silent. Resampling now selects rows by position, immune to index labels; output on unique-index input is unchanged (bit-identical at a fixed seed).
 - Added: per-state support floor in `bootstrap_dws`. A state informed by fewer than `min_state_respondents` (default 10) paired-comparison respondents, or estimable in fewer than half the bootstrap replicates (`min_state_reps`), previously published a spuriously tight interval with no warning (a 1-respondent state's interval could be tighter than every well-supported state's); it now publishes NaN se/lo/hi with a warning naming each state and the floor it failed, and keeps the point estimate. New `weights` columns: `n_resp_pc`, `n_resp_phe`, `supported`.
@@ -11,7 +13,7 @@
 - Fixed (F9): small-n_boot runs with successful replicates no longer raise a false "design is too fragile" error (the old gate was unreachable below n_boot=20 even at 100% success); the fragility gate now fires on the failure fraction with a message reporting the true counts, and small n_boot is documented as a smoke-run mode (dw publishes, intervals blank with the accurate n_reps message).
 - Fixed (P6): `bootstrap_dws` is importable from the package top level (`from welfareweights import bootstrap_dws`).
 - Fixed (P9): the `bootstrap_dws` docstring no longer carries a stale exhaustive pass-through kwargs list; it defers to `estimate_dws`'s signature.
-- Doc staleness note for the release-time sweep: METHODS §5 and VALIDATION §7 describe the curvature gate as the sole levels defense and (implicitly) the abs-slope metric; both claims are stale after F2/F5 and the release sweep owns those edits.
+- Docs: METHODS §5/§7-map, VALIDATION §7, and the typeset methods guide updated for the exact curvature metric and the extrapolation diagnostic; the new test files are listed in both audit maps.
 
 ## 0.1.0 (2026-07-16)
 

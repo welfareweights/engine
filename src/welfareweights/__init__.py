@@ -22,4 +22,4 @@ from welfareweights.inference import bootstrap_dws
 from welfareweights.pipeline import estimate_dws
 
 __all__ = ["estimate_dws", "bootstrap_dws"]
-__version__ = "0.1.0"
+__version__ = "0.1.1"
