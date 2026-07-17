@@ -39,6 +39,8 @@ import statsmodels.api as sm
 from scipy.special import logit
 from scipy.stats import norm
 
+from welfareweights.checks import check_phe_df
+
 
 @dataclass
 class PHEFit:
@@ -62,8 +64,19 @@ def thresholds(n_cases: np.ndarray, deaths: int | np.ndarray) -> np.ndarray:
     deaths may be a scalar or a per-response array (broadcast against n_cases).
     """
     ratio = np.asarray(deaths, dtype=float) / np.asarray(n_cases, dtype=float)
-    if np.any(ratio >= 1.0) or np.any(ratio <= 0.0):
-        raise ValueError("n_cases must exceed deaths so the threshold ratio lies in (0, 1)")
+    # All-based guard, deliberately (audit finding F4): np.all is False
+    # whenever any element is NaN, so missing n_cases/deaths fail HERE, in the
+    # function written to validate the ratio, instead of sailing through an
+    # any-based check into statsmodels (fit path) or into a silently-NaN
+    # mean_loglik (validate.eval_phe path). Empty input passes vacuously —
+    # correct, since emptiness is caught earlier by the front door
+    # (welfareweights.checks) with a sharper message.
+    if not np.all((ratio > 0.0) & (ratio < 1.0)):
+        raise ValueError(
+            "threshold ratio deaths/n_cases must be finite and lie strictly in (0, 1) for "
+            "every response (n_cases must exceed deaths); check n_cases and deaths for "
+            "missing, non-positive, or contradictory values"
+        )
     return logit(ratio)
 
 
@@ -75,7 +88,11 @@ def fit_phe(phe_df: pd.DataFrame, deaths: int | None = None) -> PHEFit:
     used and a contradictory argument raises — the threshold must be computed
     from the deaths figure the respondent actually saw. Without the column,
     the argument is used, defaulting to the GBD instrument's 1000.
+
+    phe_df is validated up front (welfareweights.checks): malformed input
+    raises ValueError naming the frame, column, and cause.
     """
+    check_phe_df(phe_df)
     states = sorted(set(phe_df["state"]))
 
     if "deaths" in phe_df.columns:

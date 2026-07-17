@@ -160,6 +160,77 @@ def test_bootstrap_well_supported_stays_silent():
     assert res.weights[["se", "lo", "hi"]].notna().all().all()
 
 
+# --- regression tests for the audit's fix-before-scale finding F9 -----------
+
+
+def test_small_nboot_all_success_no_false_fragility():
+    """F9: a small smoke run with zero replicate failures must COMPLETE with
+    an accurate per-state accounting — the mandated small-runs-gate-big-ones
+    cadence hits exactly this path before any scaled bootstrap. With the
+    default floors, n_boot below 20 can never publish a supported interval
+    (n_reps <= n_boot < 20), so small n_boot is a smoke-run mode: dw
+    publishes, every interval blanks with the accurate n_reps message
+    (including the raise-n_boot routing clause), never a false data-fragility
+    verdict.
+
+    Observed pre-fix behavior (this exact call, unfixed tree):
+    bootstrap_dws(PC6, PHE6, n_boot=10, rng=7) always raised ValueError
+    'only 10/10 bootstrap replicates were estimable; the design is too
+    fragile at this sample size for interval estimates to mean anything' —
+    false on the count's meaning (all 10 replicates SUCCEEDED) and on the
+    verdict (the design is fine; n_boot is just small)."""
+    with pytest.warns(UserWarning, match="support floor") as rec:
+        res = bootstrap_dws(PC6, PHE6, n_boot=10, rng=SEED)
+    assert res.n_failed == 0
+    w = res.weights
+    assert w[["se", "lo", "hi"]].isna().all().all()
+    assert not w["supported"].any()
+    assert (w["n_reps"] <= 10).all()
+    assert np.isfinite(w["dw"]).all()  # point estimates retained everywhere
+    msgs = [str(m.message) for m in rec if "support floor" in str(m.message)]
+    assert msgs and "may recover at larger n_boot" in msgs[0]
+
+
+def test_failure_fraction_gate(monkeypatch):
+    """F9: the whole-run fragility gate fires on the FAILURE fraction (more
+    than half of attempted replicates) with a message carrying the true
+    counts, and stays quiet below that documented tolerance.
+
+    Monkeypatching the replicate estimator is the honest tool here: forcing
+    a deterministic >50% replicate failure rate organically requires a
+    contrived fragile design, and what F9 indicts is the gate's ARITHMETIC
+    and message (same isolation spirit as test_failure_modes' duck-typed
+    fits). The full-sample point call always succeeds; a fixed pattern of
+    replicate calls raises the ValueError bootstrap_dws counts as a
+    replicate failure."""
+    import welfareweights.inference as winf
+
+    real = winf.estimate_dws
+
+    def failing(per_five):
+        calls = {"n": 0}
+
+        def wrapper(pc_df, phe_df, **kw):
+            calls["n"] += 1
+            if calls["n"] == 1:  # the full-sample point run
+                return real(pc_df, phe_df, **kw)
+            if (calls["n"] - 2) % 5 < per_five:  # deterministic replicate subset
+                raise ValueError("forced replicate failure")
+            return real(pc_df, phe_df, **kw)
+
+        return wrapper
+
+    monkeypatch.setattr(winf, "estimate_dws", failing(3))  # 12 of 20 replicates fail
+    with pytest.raises(ValueError, match="12 of 20 bootstrap replicates failed"):
+        bootstrap_dws(PC6, PHE6, n_boot=20, rng=SEED)
+
+    monkeypatch.setattr(winf, "estimate_dws", failing(2))  # 8 of 20: below half
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # the support floor fires at n_reps=12
+        res = bootstrap_dws(PC6, PHE6, n_boot=20, rng=SEED)
+    assert res.n_failed == 8
+
+
 def test_bootstrap_rep_floor_wiring():
     """B2, second leg: the n_reps floor is independently wired.
 

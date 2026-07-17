@@ -37,6 +37,7 @@ import pandas as pd
 from scipy.stats import norm
 
 from welfareweights.anchor import PHEFit, thresholds
+from welfareweights.checks import check_pc_df, check_phe_df
 from welfareweights.pipeline import estimate_dws
 from welfareweights.probit import PCFit
 
@@ -189,7 +190,15 @@ def holdout_fit(
     the fitted model and for a null model (the train base rate), a
     calibration table, and counts of skipped rows (module docstring) plus
     train/test respondent counts.
+
+    Both frames are validated up front (welfareweights.checks) — covering
+    the train AND test partitions in one call, so e.g. a NaN n_cases in a
+    held-out row raises here instead of propagating to a silently-NaN
+    mean_loglik — and malformed input raises ValueError naming the frame,
+    column, and cause.
     """
+    check_pc_df(pc_df, require_respondent_id=True)
+    check_phe_df(phe_df, require_respondent_id=True)
     rng = np.random.default_rng(rng)
     ids = np.union1d(pc_df["respondent_id"].unique(), phe_df["respondent_id"].unique())
     n_test = max(1, round(len(ids) * test_frac)) if len(ids) else 0

@@ -25,12 +25,14 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
+from welfareweights.checks import check_pc_df, check_phe_df
 from welfareweights.pipeline import estimate_dws
 
 
 @dataclass
 class BootstrapDWs:
-    # weights per state: dw (full-sample point estimate), se (SD across
+    # weights per state: dw and extrapolation (both from the full-sample
+    # point estimate — see pipeline.estimate_dws), se (SD across
     # replicates), lo/hi (percentile interval), n_reps (replicates in which
     # the state was estimable), n_resp_pc / n_resp_phe (distinct respondents
     # informing the state in each module), supported (False where the
@@ -67,7 +69,20 @@ def bootstrap_dws(
 
     min_state_respondents and min_state_reps set the per-state support floor
     below (they are NOT passed through); every other keyword argument goes to
-    estimate_dws (deaths, ref_state, tau, min_anchor_r2, weight_by_precision).
+    estimate_dws (see its signature for the full list).
+
+    level must lie strictly in (0, 1) — e.g. level=0.95 for a 95% interval —
+    and n_boot must be at least 1; both are validated at entry, as are the
+    two frames (welfareweights.checks, respondent_id required), so a
+    malformed input fails in milliseconds rather than after a full
+    estimation run.
+
+    Small n_boot is a smoke-run mode: with the default floors, n_boot below
+    20 can never publish a supported interval (n_reps <= n_boot < 20), so
+    the run completes, dw publishes, and every interval blanks with the
+    accurate n_reps message — never a false data-fragility verdict. The
+    whole-run fragility gate raises only when more than half the attempted
+    replicates actually FAIL estimation.
 
     Per-state support floor (audit finding B2). A state's interval rests on
     the respondents who actually inform it, not on total N: with R distinct
@@ -103,15 +118,18 @@ def bootstrap_dws(
         (moderate-support coverage is studies/coverage.py's mandate); a
         higher floor would blank the thin-but-honest provisional intervals
         the promotion design wants visible.
-      min_state_reps (default None = max(20, n_boot // 2), deliberately
-        mirroring the whole-run fragility gate — same rationale per state):
-        a state estimable in only a minority of replicates has percentile
-        endpoints computed over a SELECTED subset — the resamples in which a
-        fragile state survived are systematically the better-behaved ones,
-        biasing the interval narrow — and quantiles of fewer than ~20 points
-        are order statistics of a tiny sample. This leg alone would NOT
-        catch the 1-respondent case (n_reps ~ 0.63 * n_boot sails past
-        half); the respondent leg is primary.
+      min_state_reps (default None = a majority of the SUCCESSFUL
+        replicates, max(20, ceil(n_successful / 2)) — the same majority
+        policy as the whole-run fragility gate, applied per state, plus an
+        absolute 20-point quantile-resolution floor): a state estimable in
+        only a minority of replicates has percentile endpoints computed
+        over a SELECTED subset — the resamples in which a fragile state
+        survived are systematically the better-behaved ones, biasing the
+        interval narrow — and quantiles of fewer than ~20 points are order
+        statistics of a tiny sample. This leg alone would NOT catch the
+        1-respondent case (n_reps ~ 0.63 * n_boot sails past half); the
+        respondent leg is primary. An explicit min_state_reps value is used
+        exactly as given.
 
     PHE support (n_resp_phe) is reported but never gated: a thin PHE anchor
     state distorts the anchor map globally through its OLS leverage, so
@@ -120,6 +138,15 @@ def bootstrap_dws(
     risk. Setting both floors to 0 disables the gate entirely (research-use
     escape hatch, e.g. for simulation studies of the ungated estimator).
     """
+    if not 0.0 < level < 1.0:
+        raise ValueError(
+            f"level must be a fraction strictly between 0 and 1 (e.g. level=0.95 for a "
+            f"95% interval), got {level!r}"
+        )
+    if n_boot < 1:
+        raise ValueError(f"n_boot must be a positive integer, got {n_boot!r}")
+    check_pc_df(pc_df, require_respondent_id=True)
+    check_phe_df(phe_df, require_respondent_id=True)
     rng = np.random.default_rng(rng)
     point, diag = estimate_dws(pc_df, phe_df, **estimate_kwargs)
 
@@ -141,13 +168,17 @@ def bootstrap_dws(
             reps.append(w["dw"])
         except (ValueError, np.linalg.LinAlgError):
             n_failed += 1
-    # F9 cross-reference: the per-state rep floor below reuses this same
-    # max(20, n_boot // 2) expression on purpose (one policy, applied whole-run
-    # and per-state); the F9 fix (failure-fraction gate) must change both.
-    if len(reps) < max(20, n_boot // 2):
+    # Majority policy, whole-run leg (the per-state rep floor below shares
+    # the rationale and the two must move together — audit findings B2/F9):
+    # percentile endpoints are meaningful only over a majority, not a
+    # selected minority, of their parent set; the parent set here is the
+    # ATTEMPTED replicates, so the gate fires on the failure fraction and
+    # reports the true counts (a small all-success run passes clean).
+    if 2 * n_failed > n_boot:
         raise ValueError(
-            f"only {len(reps)}/{n_boot} bootstrap replicates were estimable; the design "
-            "is too fragile at this sample size for interval estimates to mean anything"
+            f"{n_failed} of {n_boot} bootstrap replicates failed estimation (more than "
+            "half); the design is too fragile at this sample size for interval "
+            "estimates to mean anything"
         )
 
     mat = pd.concat(reps, axis=1)
@@ -155,6 +186,7 @@ def bootstrap_dws(
     weights = pd.DataFrame(
         {
             "dw": point["dw"],
+            "extrapolation": point["extrapolation"],
             "se": mat.std(axis=1, ddof=1),
             "lo": mat.quantile(alpha, axis=1),
             "hi": mat.quantile(1.0 - alpha, axis=1),
@@ -179,9 +211,15 @@ def bootstrap_dws(
     weights["n_resp_pc"] = n_resp_pc.reindex(point.index).fillna(0).astype(int)
     weights["n_resp_phe"] = n_resp_phe.reindex(point.index).fillna(0).astype(int)
 
-    # F9 cross-reference: same expression as the whole-run gate above — the
-    # F9 failure-fraction fix must change both together.
-    rep_floor = max(20, n_boot // 2) if min_state_reps is None else min_state_reps
+    # Majority policy, per-state leg (cross-reference: whole-run gate above;
+    # the two must move together — audit findings B2/F9). The parent set here
+    # is the SUCCESSFUL replicates, because the selection-bias argument is
+    # about a state missing from resamples that did succeed. The absolute 20
+    # is quantile RESOLUTION — endpoints from fewer than ~20 points are order
+    # statistics of a tiny sample — and exists only here because only
+    # per-state quantiles are published; the whole-run gate publishes nothing
+    # itself and so has no resolution leg.
+    rep_floor = max(20, (len(reps) + 1) // 2) if min_state_reps is None else min_state_reps
     gated = (weights["n_resp_pc"] < min_state_respondents) | (weights["n_reps"] < rep_floor)
     weights["supported"] = ~gated
     if gated.any():
@@ -199,7 +237,8 @@ def bootstrap_dws(
             f"{int(gated.sum())} state(s) below the per-state support floor — se/lo/hi "
             f"blanked (NaN): {'; '.join(details)}; a respondent-cluster bootstrap cannot "
             "express uncertainty for a state this thin, and the interval it would publish "
-            "is spuriously tight; point estimates (dw) are retained"
+            "is spuriously tight; point estimates (dw) are retained; states failing only "
+            "the n_reps floor may recover at larger n_boot"
         )
         weights.loc[gated, ["se", "lo", "hi"]] = np.nan
     return BootstrapDWs(

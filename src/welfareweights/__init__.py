@@ -18,7 +18,8 @@ process the estimator assumes, so recovery of known true weights is the
 package's core correctness test. ``pipeline`` chains A-C end to end.
 """
 
+from welfareweights.inference import bootstrap_dws
 from welfareweights.pipeline import estimate_dws
 
-__all__ = ["estimate_dws"]
+__all__ = ["estimate_dws", "bootstrap_dws"]
 __version__ = "0.1.0"

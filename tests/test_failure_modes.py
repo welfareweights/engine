@@ -25,6 +25,7 @@ fixture pair, matching test_recovery's fixture-reuse style.
 """
 
 import types
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -230,6 +231,45 @@ def test_estimate_dws_drops_one_sided_state_with_warning(clean_pc_df, clean_phe_
     assert diag["one_sided_dropped"] == [target]
     assert set(weights.index) == set(STATES)  # all 10 PC states still present
     assert weights["dw"].notna().all()
+
+
+def test_estimate_dws_warns_on_phe_only_state(clean_pc_df, clean_phe_df):
+    """F6: a state present in the PHE responses but absent from the paired
+    comparisons is mathematically-correctly excluded from the weights (no
+    stage-A coefficient exists to map), but the exclusion must be LOUD — a
+    state silently disappearing from published output is the one anomaly an
+    unattended publisher's warning channel would otherwise never surface.
+    The audit verified the pre-fix behavior: a state with ample two-sided
+    PHE responses and zero PC rows was absent from the weights index with no
+    warning (unlike every other data-quality anomaly in the pipeline), only
+    the silent diagnostics['phe_only_states'] entry recording it."""
+    extra = pd.DataFrame(
+        {
+            "respondent_id": [5000 + i for i in range(40)],
+            "state": ["sphe"] * 40,
+            "n_cases": [2000] * 40,
+            "deaths": [1000] * 40,
+            "y": [1, 0] * 20,  # two-sided: the one-sided drop path must not fire
+        }
+    )
+    phe_plus = pd.concat([clean_phe_df, extra], ignore_index=True)
+
+    with pytest.warns(UserWarning, match="no paired-comparison data") as rec:
+        weights, diag = estimate_dws(clean_pc_df, phe_plus)
+
+    assert "sphe" not in weights.index
+    assert diag["phe_only_states"] == ["sphe"]  # the diagnostics entry stays
+    fired = [str(m.message) for m in rec if "no paired-comparison data" in str(m.message)]
+    assert fired and "sphe" in fired[0]
+
+
+def test_no_phe_only_warning_on_clean_data(clean_pc_df, clean_phe_df):
+    """F6 silence leg: when every PHE state also has paired-comparison data,
+    the phe-only warning must not fire."""
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        estimate_dws(clean_pc_df, clean_phe_df)
+    assert not [w for w in caught if "no paired-comparison data" in str(w.message)]
 
 
 def test_estimate_dws_warns_below_min_anchor_r2(clean_pc_df, clean_phe_df):

@@ -55,15 +55,21 @@ class AnchorMap:
     # Curvature diagnostic: curvature in the A<->B link damages weight levels
     # while leaving both rankings and R^2 nearly intact (measured in
     # studies/RESULTS-misspecification.md), so R^2 alone cannot certify
-    # levels. curvature_impact is the max disagreement, in weight units over
-    # the anchor range, between the fitted line and a quadratic fit to the
-    # same points — how much the bend matters. curvature_pvalue is the t-test
-    # on the quadratic coefficient — whether the bend is distinguishable from
-    # sampling noise, which keeps the impact metric's noise floor (it widens
-    # at small samples) from producing false alarms. Both NaN when fewer than
-    # 5 shared states (a quadratic through 3 points is exact interpolation).
+    # levels. curvature_impact is the exact line-inversion error, in weight
+    # units over the anchor range, when the true link is the quadratic fit to
+    # the same points — how much the bend matters. curvature_pvalue is the
+    # t-test on the quadratic coefficient — whether the bend is
+    # distinguishable from sampling noise, which keeps the impact metric's
+    # noise floor (it widens at small samples) from producing false alarms.
+    # Both NaN when fewer than 5 shared states (a quadratic through 3 points
+    # is exact interpolation).
     curvature_impact: float
     curvature_pvalue: float
+    # Stage-B logit-dw x-range (min, max) over the shared anchor states: the
+    # interval on which the anchor line was actually fitted. States mapped
+    # outside it are extrapolated — pipeline.estimate_dws publishes each
+    # state's distance past it in the `extrapolation` weights column.
+    anchor_range: tuple[float, float]
 
     def to_logit_dw(self, beta: pd.Series) -> pd.Series:
         return (beta - self.intercept) / self.slope
@@ -106,7 +112,16 @@ def fit_anchor_map(
         Xq = np.column_stack([np.ones_like(x), x, x * x])
         coef, *_ = np.linalg.lstsq(Xq, y, rcond=None)
         quad = Xq @ coef
-        dx = (quad - lin) / abs(slope)  # the bend, converted to logit-dw units
+        # Signed slope, deliberately (audit finding F2): stage C inverts the
+        # fitted line, x = (y - intercept)/slope, so when the true link is the
+        # quadratic the x-error of that inversion at anchor i is
+        # (quad_i - lin_i)/slope — algebraically identical to line-inverting
+        # the quadratic's y. slope < 0 is enforced above, so dividing by
+        # abs(slope) would flip every displacement, and expit's asymmetry away
+        # from 0 then mis-sizes the metric by 5-11% depending on bend
+        # direction (verified against brute-force inversion in
+        # tests/test_curvature_diagnostic.py).
+        dx = (quad - lin) / slope  # signed line-inversion error, logit-dw units
         curvature_impact = float(np.max(np.abs(expit(x + dx) - expit(x))))
         dof = len(shared) - 3
         qresid = y - quad
@@ -123,6 +138,7 @@ def fit_anchor_map(
         r_squared=float(r2),
         curvature_impact=curvature_impact,
         curvature_pvalue=curvature_pvalue,
+        anchor_range=(float(x.min()), float(x.max())),
     )
 
 

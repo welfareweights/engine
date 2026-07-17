@@ -16,6 +16,7 @@ from dataclasses import dataclass
 import pandas as pd
 import statsmodels.api as sm
 
+from welfareweights.checks import check_pc_df
 from welfareweights.design import build_pc_design, connected_components, infer_states
 
 
@@ -44,7 +45,11 @@ def fit_pc(
     ref_state defaults to the first state in sorted order. The choice is an
     arbitrary normalization: final disability weights must be invariant to it
     (verified numerically in the test suite — replication decision 2).
+
+    pc_df is validated up front (welfareweights.checks): malformed input
+    raises ValueError naming the frame, column, and cause.
     """
+    check_pc_df(pc_df)
     if states is None:
         states = infer_states(pc_df)
     comps = connected_components(pc_df)
